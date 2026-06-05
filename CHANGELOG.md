@@ -1,3 +1,9 @@
+## [0.1.4]
+
+* Fixed:
+* Fixed viewport draw order by using `SliverPaintOrder.firstIsTop` instead of manual paint order reversal.
+* Tweaked `CustomPageScrollPhysics` spring parameters for smoother menu open/close animation (mass: 1, stiffness: 300, damping: 30).
+
 ## [0.1.3]
 
 * Added:
