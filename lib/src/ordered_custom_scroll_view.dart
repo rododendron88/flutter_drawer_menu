@@ -720,6 +720,7 @@ class Viewport extends MultiChildRenderObjectWidget {
         cacheExtent: cacheExtent,
         cacheExtentStyle: cacheExtentStyle,
         clipBehavior: clipBehavior,
+        paintOrder: SliverPaintOrder.firstIsTop,
       );
 
   @override
@@ -762,8 +763,6 @@ class Viewport extends MultiChildRenderObjectWidget {
 }
 
 class MyRenderViewport extends RenderViewport {
-  //MyRenderViewport({required super.crossAxisDirection,
-  // required super.offset});
   MyRenderViewport({
     required super.crossAxisDirection,
     required super.offset,
@@ -774,11 +773,12 @@ class MyRenderViewport extends RenderViewport {
     super.cacheExtent,
     super.cacheExtentStyle,
     super.clipBehavior,
+    super.paintOrder
   });
 
   @override
   Iterable<RenderSliver> get childrenInPaintOrder =>
-      super.childrenInPaintOrder.toList().reversed;
+      super.childrenInPaintOrder;
 }
 
 class _ViewportElement extends MultiChildRenderObjectElement
