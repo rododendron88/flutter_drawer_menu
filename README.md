@@ -106,7 +106,8 @@ ValueListenableBuilder<bool>(
 | bodyParallaxFactor       |        `double`         | Multiplier for the parallax effect applied to the body when the menu is opened. 0 - the body moves together with the menu. 1 - the body stays in place. Default is 0.5. |
 | useRepaintBoundaries     |         `bool`          |                     Use `RepaintBoundary` to isolate the rendering of the menu and body widgets for improve repaints performance. Default is True.                      |
 | backgroundColor          |         `Color`         |                                                    Background color under the menu and body.Default is Colors.white.                                                    |
-| dragMode          |         `DragMode`         |                                                    Drag mode setting (never, always, onlyFling). onlyFling - the menu opens only by gesture.                                                    |
+| dragMode                 |       `DragMode`        |                                        Drag mode setting (never, always, onlyFling). onlyFling - the menu opens only by gesture.                                        |
+| handleSystemBack         |         `bool`          | Intercept system back action to close the menu if open, rather than popping the route. Body-level back handlers must check `!isOpen` to yield to the menu. Default is True. |
 
 ---
 

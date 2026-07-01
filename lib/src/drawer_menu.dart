@@ -93,6 +93,15 @@ class DrawerMenu extends StatefulWidget {
   /// Drag mode for the menu.
   final DragMode dragMode;
 
+  /// Whether the widget should intercept the system back gesture or
+  /// back button.
+  /// If true, the system back action will close the menu when it's open in
+  /// phone mode, preventing the enclosing route from being popped.
+  /// When false, or when the menu is closed, or in tablet mode, this widget
+  /// allows normal navigation precedence.
+  /// Default is true.
+  final bool handleSystemBack;
+
   /// Creates a widget that displays a slideable menu
   /// in phone mode and a side menu in tablet mode.
   const DrawerMenu(
@@ -112,7 +121,8 @@ class DrawerMenu extends StatefulWidget {
       this.bodyParallaxFactor = 0.5,
       this.useRepaintBoundaries = true,
       this.backgroundColor = Colors.white,
-      this.dragMode = DragMode.always})
+      this.dragMode = DragMode.always,
+      this.handleSystemBack = true})
       : super(key: key);
 
   @override
@@ -445,12 +455,27 @@ class DrawerMenuState extends State<DrawerMenu> {
     );
 
     // apply ScrollConfiguration for delete bars and indicators
-    return ColoredBox(
+    final scrollConfig = ColoredBox(
       color: widget.backgroundColor,
       child: ScrollConfiguration(
         behavior: const DrawerMenuScrollBehavior(),
         child: customScroll,
       ),
+    );
+
+    // intercept system back gesture
+    return ValueListenableBuilder<bool>(
+      valueListenable: _controller.isOpenNotifier,
+      builder: (context, isOpen, child) => PopScope(
+        canPop: !widget.handleSystemBack || _isTabletMode || !isOpen,
+        onPopInvokedWithResult: (didPop, result) {
+          if (!didPop && isOpen && widget.handleSystemBack && !_isTabletMode) {
+            close();
+          }
+        },
+        child: child!,
+      ),
+      child: scrollConfig,
     );
   }
 
@@ -463,10 +488,10 @@ class DrawerMenuState extends State<DrawerMenu> {
       child: widget.menu,
     );
 
-    //wrap with Scaffold for applying user theme
-    widgetMenu = Scaffold(
-      body: widgetMenu,
-      backgroundColor: Colors.transparent,
+    //wrap with Material for applying user theme
+    widgetMenu = Material(
+      color: Colors.transparent,
+      child: widgetMenu,
     );
 
     // setup size
@@ -509,9 +534,9 @@ class DrawerMenuState extends State<DrawerMenu> {
       BoxConstraints constraints, bool isOpen, double scrollOffset) {
     // initial calculations
     final scrimColor = widget.scrimColor ?? Colors.transparent;
-    final alphaOfScrimColor = scrimColor.opacity;
+    final alphaOfScrimColor = scrimColor.a;
     final shadowColor = widget.shadowColor ?? Colors.transparent;
-    final alphaOfShadowColor = shadowColor.opacity;
+    final alphaOfShadowColor = shadowColor.a;
 
     final scrollPosition =
         (-scrollOffset / _calculatedDraggableMenuWidth).clamp(0.0, 1.0);
@@ -529,7 +554,7 @@ class DrawerMenuState extends State<DrawerMenu> {
     Widget? widgetScrim;
     if (isOpen) {
       widgetScrim = ColoredBox(
-        color: scrimColor.withOpacity(scrimOpacity),
+        color: scrimColor.withValues(alpha: scrimOpacity),
       );
     }
 
@@ -539,11 +564,11 @@ class DrawerMenuState extends State<DrawerMenu> {
       widgetShadow = Container(
         decoration: BoxDecoration(
             gradient: LinearGradient(colors: [
-          shadowColor.withOpacity(scrollPosition * alphaOfShadowColor),
-          shadowColor.withOpacity(scrollPosition *
+          shadowColor.withValues(alpha: scrollPosition * alphaOfShadowColor),
+          shadowColor.withValues(alpha: scrollPosition *
               alphaOfShadowColor *
               _alphaMultiplierForShadowCenter),
-          shadowColor.withAlpha(0)
+          shadowColor.withValues(alpha: 0)
         ])),
         width: widget.shadowWidth,
       );

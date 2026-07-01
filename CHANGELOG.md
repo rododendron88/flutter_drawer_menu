@@ -1,3 +1,9 @@
+## [0.1.5]
+
+* Added:
+* `handleSystemBack` logic (enabled by default) to allow closing the drawer via system back gesture / back button instead of popping the app route.
+* Added an example of custom body transformation (scaling scaling up/down alongside scroll offset) using `DrawerMenuController` to `example` app.
+
 ## [0.1.4]
 
 * Fixed:

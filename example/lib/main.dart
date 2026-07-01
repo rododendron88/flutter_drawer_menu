@@ -72,6 +72,7 @@ class _MyHomePageState extends State<MyHomePage> {
       shadowColor: const Color(0x66000000),
       dragMode:
           _selectedContent % 2 != 0 ? DragMode.always : DragMode.onlyFling,
+      handleSystemBack: true,
     );
   }
 
@@ -138,13 +139,30 @@ class _MyHomePageState extends State<MyHomePage> {
           );
         });
 
-    return Scaffold(
+    final scaffold = Scaffold(
       appBar: AppBar(
         title: Text(widget.title),
         centerTitle: true,
         leading: leadingWidget,
       ),
       body: _buildContent(context, _selectedContent),
+    );
+
+    // The body is scaled down when the menu is opened in phone mode.
+    return ValueListenableBuilder<double>(
+      valueListenable: _controller.scrollPositionNotifier,
+      builder: (context, value, child) {
+        Transform transform = Transform.scale(
+          scale: _controller.isTabletModeNotifier.value ? 1.0 : 1 - value * 0.1,
+          alignment: Alignment.centerLeft,
+          child: child,
+        );
+        return ColoredBox(
+          color: Theme.of(context).appBarTheme.backgroundColor ?? Colors.black,
+          child: transform,
+        );
+      },
+      child: scaffold,
     );
   }
 
@@ -166,7 +184,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
     /// Content part
     Widget content = Container(
-      color: Colors.black.withOpacity(0.05),
+      color: Colors.black.withValues(alpha: 0.05),
       padding: const EdgeInsets.all(16.0),
       child: Center(
         child: Column(
@@ -190,18 +208,31 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
     );
 
+    Widget result;
     if (index % 2 == 0) {
-      return Column(
+      result = Column(
         children: [pageView, Expanded(child: content)],
       );
     } else {
-      return ListView(
+      result = ListView(
         children: [
           pageView,
           for (int i = 0; i < 100; i++) content,
         ],
       );
     }
+
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, _) {
+        if (!didPop) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Back handler from Body triggered')),
+          );
+        }
+      },
+      child: result,
+    );
   }
 }
 
